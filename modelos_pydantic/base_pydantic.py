@@ -4,30 +4,30 @@ from pydantic import BaseModel, Field, field_validator ,model_validator, EmailSt
 from typing import Optional, Set
 import re
 from catalagos import *
-from data import data_fe
+
 
 app = FastAPI()
     
 class Identificacion(BaseModel):
     version:int = Field(default=1, description="Version")
     ambiente:AmbienteDestino = Field(description="Ambiente de destino")
-    tipoDte:TipoDocumento = Field(default="01", description="Tipo de Documento")
+    tipoDte:TipoDocumento = Field( description="Tipo de Documento")
     numeroControl:str = Field(
-        description="Numero de control",
-        max_length=31,
-        min_length=31,
-        pattern="^DTE-01-[A-Z0-9]{8}-[0-9]{15}$",
+        description= "Numero de control",
+        max_length= 31,
+        min_length= 31,
+        pattern= r"^DTE-01-[A-Z0-9]{8}-[0-9]{15}$",
     )
     codigoGeneracion:str = Field(
-        description="Código de generación",
+        description= "Código de generación",
         max_length= 36,
         min_length= 36,
-        pattern="^[A-F0-9]{8}-[A-F0-9]{4}-[A-F0-9]{4}-[A-F0-9]{4}-[A-F0-9]{12}$",
+        pattern= r"^[A-F0-9]{8}-[A-F0-9]{4}-[A-F0-9]{4}-[A-F0-9]{4}-[A-F0-9]{12}$",
     )
     tipoModelo:ModeloFacturacion = Field(
         description= "Modelo de Facturación", 
-        ge= ModeloFacturacion.modeloFacturacionPrevio, 
-        le= ModeloFacturacion.modeloFacturacionDiferido,
+        ge= 1,
+        le= 2,
     )
     #podran ingresar numeros mayores iguales a 1, y menores iguales a 2, formato entero
     tipoOperacion:TipoTransmision = Field(
@@ -51,21 +51,6 @@ class Identificacion(BaseModel):
     horEmi:time =Field(description="Hora de Generación")
     tipoMoneda: Usd = Field(description="Tipo de Moneda")
     
-    #validacion de los campos de contingencia y su coherencia entre ellos
-    @model_validator(mode="after")
-    def ValidadorOperacion(self):
-        #validamos si es una transmision normal los campos de contingencia y motivo deben ser nulos
-        if self.tipoOperacion == 1: 
-            if self.tipoContingencia != None:
-                raise ValueError(f"el tipo de contingencia deben ser null o None")
-            elif self.motivoContin != None  :
-                raise ValueError("el motivo de contingencia debe ser null or None, no debe haber motivo de contingencia") 
-        #validamos si el motivo de la contingencia es otro, si o si debemos rellenar el campo del motivo de la contingencia
-        elif self.tipoOperacion == self.transmisionDiferida:
-            if self.tipoContingencia == self.contingeciaOtro:
-                if self.motivoContin == None:
-                    raise ValueError("error, debe ingresar el motivo de la contigencia")
-
                     
 class DocRelacionado(BaseModel):
     tipoDocumento:TipoDocumento = Field(description="Tipo de Documento Tributario Relacionado")
@@ -102,11 +87,11 @@ class DocRelacionado(BaseModel):
     
 class Direccion(BaseModel):
     departamento:Departamento = Field(
-        pattern = "^0[1-9]|1[0-4]$",
+        pattern = r"^0[1-9]|1[0-4]$",
         description= "Dirección Departamento",
     )
     municipio:Municipio = Field(
-        pattern= "^[0-9]{2}$",
+        pattern= r"^[0-9]{2}$",
         description=  "Dirección Municipio",
     )
     complemento:str = Field(
@@ -127,48 +112,44 @@ class Direccion(BaseModel):
         municipio = self.municipio
         match self.departamento:
             case "01":
-                patternMuni='^0[1-9]|1[0-2]$'
+                patternMuni= r'^0[1-9]|1[0-2]$'
                 self.caseValidator(patternMuni, municipio)
             case "02" | "10":
-                patternMuni= "^0[1-9]|1[0-3]$"
+                patternMuni= r"^0[1-9]|1[0-3]$"
                 self.caseValidator(patternMuni, municipio)
             case "03" | "07":
-                patternMuni= "^0[1-9]|1[0-6]$"
+                patternMuni= r"^0[1-9]|1[0-6]$"
                 self.caseValidator(patternMuni, municipio)
             case "04":
-                patternMuni= "^0[1-9]|[12][0-9]|3[0-3]$"
+                patternMuni= r"^0[1-9]|[12][0-9]|3[0-3]$"
                 self.caseValidator(patternMuni, municipio)
             case "05" | "08":
-                patternMuni= "^0[1-9]|1[0-9]|2[0-2]$"
+                patternMuni= r"^0[1-9]|1[0-9]|2[0-2]$"
                 self.caseValidator(patternMuni, municipio)
             case "06":
-                patternMuni= "^0[1-9]|1[0-9]$"
+                patternMuni= r"^0[1-9]|1[0-9]$"
                 self.caseValidator(patternMuni, municipio)
             case "09":
-                patternMuni= "^0[1-9]$"
+                patternMuni= r"^0[1-9]$"
                 self.caseValidator(patternMuni, municipio)
             case "11":
-                patternMuni= "^0[1-9]|1[0-9]|2[0-3]$"
+                patternMuni= r"^0[1-9]|1[0-9]|2[0-3]$"
                 self.caseValidator(patternMuni, municipio)
             case "12":
-                patternMuni= "^0[1-9]|1[0-9]|20$"
+                patternMuni= r"^0[1-9]|1[0-9]|20$"
                 self.caseValidator(patternMuni, municipio)
             case "13":
-                patternMuni= "^0[1-9]|1[0-9]|2[0-6]$"
+                patternMuni= r"^0[1-9]|1[0-9]|2[0-6]$"
                 self.caseValidator(patternMuni, municipio)
             case "14":
-                patternMuni= "^0[1-9]|1[0-8]$"
+                patternMuni= r"^0[1-9]|1[0-8]$"
                 self.caseValidator(patternMuni, municipio)
-            
+         
+        return self   
 
 
 class Emisor(BaseModel):
-    #verificar el numero de caracteres del nit si pueden ser menores
-    nit:str = Field(
-        pattern= "^([0-9]{14}|[0-9]{9})$",
-        max_length= 14,
-        description= "NIT (emisor)",
-    )
+    
     nrc:str = Field(
         pattern= "^[0-9]{1,8}$",
         min_length= 2,
@@ -239,29 +220,18 @@ class Receptor(BaseModel):
         max_length= 20,
         description=  "Número de documento de Identificación (Receptor)",
     )
-    nrc:str = Field(
-        pattern= "^[0-9]{1,8}$",
-        min_length= 2,
-        max_length= 8,
-        description= ("NRC (Receptor)"),
-    )
+  
     nombre:str =Field(
         min_length= 1,
         max_length= 250,
         description= "Nombre, denominación o razón social del contribuyente (Receptor)",
     )
-    codActividad:str = Field(
-        pattern= "^[0-9]{2,6}$",
-        min_length= 5,
-        max_length= 6,
-        description="Código de Actividad Económica (Receptor)"
-    )
+    
     descActividad:str = Field(
         min_length= 5, 
         max_length= 150,
         description="Actividad Económica (Receptor)"
     )
-    direccion: Direccion
     telefono:str = Field(
         min_length= 8,
         max_length= 30,
@@ -273,21 +243,6 @@ class Receptor(BaseModel):
         description= "Correo electrónico (Receptor)"
     )
 
-    @model_validator(mode="after")
-    def DocumentoReceptorValidator(self):
-        if self.tipoDocumento == TipoDocumentoReceptor.nit:
-            patternDoc = re.compile(r"^([0-9]{14}|[0-9]{9})$")
-            if not patternDoc.match(str(self.numDocumento)):
-                raise ValueError(f"El patron del {TipoDocumentoReceptor.nit.name} no cumple con la condicion {patternDoc}")
-            else:
-                if self.nrc != None:
-                    raise ValueError(f"El nrc debe ser null o none") 
-        elif self.tipoDocumento == TipoDocumentoReceptor.dui:
-            patternDoc = re.compile(r"^[0-9]{8}-[0-9]{1}$")
-            if not patternDoc.match(str(self.numDocumento)):
-                raise ValueError(f"El patron del {TipoDocumentoReceptor.dui.name} no cumple con la condicion {patternDoc}")
-        
-        return self
 class Medico(BaseModel):
     nombre: str = Field (
         max_length= 100,
@@ -326,23 +281,8 @@ class OtroDocumento(BaseModel):
         max_length= 300,
         description= "Descripción de documento asociado",
     )
-    medico:Optional[Medico] = Field()
     
-    @model_validator(mode="after")
-    def OtroDocumentoValidator(self):
-        if self.codDocAsociado == 3:
-            if self.descDocumento != None or self.detalleDocumento != None:
-                raise ValueError("el valor de desDocumento y detalleDocumento debe ser null o none")
-            if self.medico != None:
-                raise ValueError("los datos del medico no pueden ser None") 
-        else:
-            if self.descDocumento == None:
-                raise ValueError(f"el valor de descDocumento no puede ser None")
-            elif self.detalleDocumento == None:
-                raise ValueError(f"el valor de detalleDocumento no puede ser None")
-            elif self.medico != None:
-                raise ValueError("el valor de la variable medico debe ser null o none") 
-
+    
 class VentaTercero(BaseModel):
      nit:str = Field(
         pattern= "^([0-9]{14}|[0-9]{9})$",
@@ -361,14 +301,7 @@ class ItemCuerpoDocumento(BaseModel):
         le= 2000,
         description= "N° de item",
     )
-    tipoItem:TipoItem = Field(
-        description= "Tipo de item"
-    )
-    numeroDocumento:str = Field(
-        min_length= 1,
-        max_length= 36,
-        description= "Número de documento relacionado"
-    )
+  
     cantidad:float = Field(
         gt= 0,
         lt= 100000000000,
@@ -380,11 +313,7 @@ class ItemCuerpoDocumento(BaseModel):
         max_length= 25,
         description= "Código",
     )
-    codTributo: Optional[TributosAplicadosPorItemsReflejados] = Field(
-        min_length= 2,
-        max_length= 2,
-        description= "Tributo sujeto a cálculo de IVA",
-    )
+
     uniMedida:UnidadDeMedida = Field(
         ge= 1,
         le= 99,
@@ -394,81 +323,7 @@ class ItemCuerpoDocumento(BaseModel):
         max_length= 1000,
         description= "Descripción",
     )
-    precioUni:float = Field(
-        #verficar que no existe una restriccion menor o igual a  0
-        lt= 100000000000,
-        multiple_of= 0.00000001,
-        description= "Precio Unitario"
-    )            
-    montoDescu:float = Field(
-        ge= 0,
-        lt= 100000000000,
-        multiple_of= 0.00000001,
-        description= "Descuento, Bonificación, Rebajas por ítem"
-    ) 
-    ventaNoSuj:float = Field(
-        ge= 0,
-        lt= 100000000000,
-        multiple_of= 0.00000001,
-        description= "Ventas no Sujetas", 
-    )
-    ventaExenta:float = Field(
-        ge= 0,
-        lt= 100000000000,
-        multiple_of= 0.00000001,
-        description= "Ventas Exentas",
-    )
-    ventaGravada:float = Field(
-        ge= 0,
-        lt= 100000000000,
-        multiple_of= 0.00000001,
-        description= "Ventas Gravadas",
-    )
- 
-    tributos:Optional[list[str]] = Field(
-        description= "codigo de tributo",
-        min_items = 1,
-        set = True, # nose permiten elementos duplicados en el arreglo se cambio unique_items por deprecado
-    )
-    psv: float = Field(
-        ge= 0,  
-        lt= 100000000000,  
-        multiple_of= 0.00000001,
-        description= "Precio sugerido de venta",
-    )
-    noGravado: float = Field(
-        gt= -100000000000, 
-        lt= 100000000000,
-        multiple_of= 0.00000001,
-        description= "Cargos/Abonos que no afectan la base imponible",
-    )
-    ivaItem: float = Field(
-        ge= 0,
-        lt= 100000000000,
-        multiple_of= 0.00000001,
-        description= "IVA por ítem",
-        #verificar si le ponemos optional, o le ponemos default 0
-    )
-    @model_validator(mode= "after")
-    def ventaGravadaValidator(self):
-        if self.ventaGravada <= 0:
-            if self.tributos != None:
-                raise ValueError("Cuando la venta gravada = 0, los tributos deben ser None ")
-            if self.ivaItem != 0:
-                raise ValueError("Cuando la venta gravada = 0, el iva item tambien debe ser 0")
-        if self.tipoItem == TipoItem.otrosTributosPorItem:
-            if self.uniMedida != UnidadDeMedida.otra:
-                raise ValueError("cuando el tipo de item es otro, uniMedida debe ser 99")
-            elif  self.codTributo == None:
-                raise ValueError("cuando el tipo de item es otro, codTributo no debe ser None")
-            elif self.tributos != None:
-                raise ValueError("Los tributos debe ser None")
-        else:
-            if self.codTributo != None:
-                raise ValueError("el codTributo debe ser None")
-            elif self.tributos == None:
-                raise ValueError("Ingresa los codigo de tributos, no puede ser None")
-
+    
 class ItemTributo(BaseModel):
     codigo:TributosAplicadosPorItemsReflejados = Field(
         min_length= 2,
@@ -502,58 +357,16 @@ class ItemPago(BaseModel):
         max_length= 50,
         description= "Referencia de modalidad de pago",
     )
-    plazo:Optional[str] = Field(
-        pattern= r"^0[1-3]$",
-        description="Plazo",
-    )
-    #verificar si es int o float
-    periodo:Optional[int]= Field(
-        description="Período de plazo",
-    )
+    
    
-            
+        
 class Resumen(BaseModel):
-    totalNoSuj:float = Field(
-        ge= 0,
-        lt= 100000000000,
-        multiple_of= 0.01,
-        description= "Total de Operaciones no sujetas"
-    )
-    totalExenta: float = Field(
-        ge= 0,
-        lt= 100000000000,
-        multiple_of= 0.01,
-        description= "Total de Operaciones exentas",
-    )
+  
     totalGravada: float = Field(
         ge= 0,
         lt= 100000000000,
         multiple_of= 0.01,
         description= "Total de Operaciones Gravadas",
-    )
-    subTotalVentas: float = Field(
-        ge= 0,
-        lt= 100000000000,
-        multiple_of= 0.01,
-        description= "Suma de operaciones sin impuestos",
-    )
-    descuNoSuj: float = Field(
-        ge= 0,
-        lt= 100000000000,
-        multiple_of= 0.01,
-        description= "Monto global de Descuento, Bonificación, Rebajas y otros a ventas no sujetas",
-    )
-    descuExenta: float = Field(
-        ge= 0,
-        lt= 100000000000,
-        multiple_of= 0.01,
-        description= "Monto global de Descuento, Bonificación, Rebajas y otros a ventas exentas",
-    )
-    descuGravada: float = Field(
-        ge= 0,
-        lt= 100000000000,
-        multiple_of= 0.01,
-        description= "Monto global de Descuento, Bonificación, Rebajas y otros a ventas gravadas",
     )
     porcentajeDescuento: float = Field(
         ge= 0,
@@ -566,30 +379,6 @@ class Resumen(BaseModel):
         lt= 100000000000,
         multiple_of= 0.01,
         description= "Total del monto de Descuento, Bonificación, Rebajas",
-    )
-    #para hacer que los items sean unicos, se usa Set en vez de list, en este caso no funca, verificar funcionamiento
-    tributos:list[ItemTributo] = Field(
-        # unique_items= True,
-        description= "Resumen de tributos"    
-    )
-    subTotal: float = Field(
-        ge= 0,
-        lt= 100000000000,
-        multiple_of= 0.01,
-        description= "Sub-Total",
-    )
-    ivaPercil:int = Field()
-    ivaRetel: float = Field(
-        ge= 0,
-        lt= 100000000000,
-        multiple_of= 0.01,
-        description= "IVA Retenido",
-    )
-    reteRenta: float = Field(
-        ge= 0,
-        lt= 100000000000,
-        multiple_of= 0.01,
-        description= "Retención Renta",
     )
     montoTotalOperacion: float = Field(
         ge= 0,
@@ -613,27 +402,11 @@ class Resumen(BaseModel):
         max_length= 200,
         description= "Valor en Letras",
     )
-    saldoFavor: float = Field(
-        le= 0,  
-        gt= -100000000000,
-        multiple_of= 0.01,
-        description= "Saldo a Favor",
-    )
-    totalIva: float = Field(
-        ge= 0,
-        lt= 100000000000,
-        multiple_of= 0.01,
-        description= "IVA 13%",
-    )
-  
     condicionOperacion: int = Field(
         enum=[1, 2, 3],
         description="Condición de la Operación",
     )
-    pagos:Optional[list[ItemPago]] = Field(
-        min_items = 1,
-        description= "Pagos"
-    )
+ 
     numPagoElectronico: Optional[str] = Field(
         max_length= 100,
         description= "Número de pago Electrónico"
@@ -683,49 +456,49 @@ class ApendiceItems(BaseModel):
        description= "Valor/Dato" 
     )
  
-class DataVerificado(BaseModel):
-    identificacion: Identificacion
-    documentoRelacionado:Optional[list[DocRelacionado]] = Field(
-        default= None,
-        min_length= 1,
-        max_length= 10,
-        description= "Documentos Relacionados",
-    )
-    emisor:Emisor
-    receptor:Receptor 
-    otrosDocumentos:Optional[list[OtroDocumento]] = Field( 
-        default= None,
-        min_length= 1,
-        max_length=  10,
-        description= "Documentos Asociados",
-    )
-    ventaTercero:Optional[VentaTercero] = Field( 
-        description= "Ventas por cuenta de terceros"
-    )
-    cuerpoDocumento:list[ItemCuerpoDocumento] = Field(
-        min_items =1,
-        max_items=2000
-    )
-    resumen:Resumen
-    extension:Optional[Extension]
-    apendice: list[ApendiceItems]
+# class DataVerificado(BaseModel):
+#     identificacion: Identificacion
+#     documentoRelacionado:Optional[list[DocRelacionado]] = Field(
+#         default= None,
+#         min_length= 1,
+#         max_length= 10,
+#         description= "Documentos Relacionados",
+#     )
+#     emisor:Emisor
+#     receptor:Receptor 
+#     otrosDocumentos:Optional[list[OtroDocumento]] = Field( 
+#         default= None,
+#         min_length= 1,
+#         max_length=  10,
+#         description= "Documentos Asociados",
+#     )
+#     ventaTercero:Optional[VentaTercero] = Field( 
+#         description= "Ventas por cuenta de terceros"
+#     )
+#     cuerpoDocumento:list[ItemCuerpoDocumento] = Field(
+#         min_items =1,
+#         max_items=2000
+#     )
+#     resumen:Resumen
+#     extension:Optional[Extension]
+#     apendice: list[ApendiceItems]
     
-    @model_validator(mode="after")
-    def MontoTotalOperacionValidator(self):
-        if self.resumen.montoTotalOperacion > 1095:
-            if self.receptor.tipoDocumento == None:
-                raise ValueError("el TipoDocumento no puede ser None")
-            if self.receptor.numDocumento == None:
-                raise ValueError("el numDocumento no puede ser None")
-            if self.receptor.nombre == None:
-                raise ValueError("el nombre no puede ser None")
+#     @model_validator(mode="after")
+#     def MontoTotalOperacionValidator(self):
+#         if self.resumen.montoTotalOperacion > 1095:
+#             if self.receptor.tipoDocumento == None:
+#                 raise ValueError("el TipoDocumento no puede ser None")
+#             if self.receptor.numDocumento == None:
+#                 raise ValueError("el numDocumento no puede ser None")
+#             if self.receptor.nombre == None:
+#                 raise ValueError("el nombre no puede ser None")
             
-#importamos la data para la verificacion
-data = data_fe
+# #importamos la data para la verificacion
+# data = data_fe
 
-try: 
-    data_validada = DataVerificado(**data)
-    print("Se valido correctamente")
-    print(data)
-except ValueError as e:
-    print(f'Error de validadcion: {e}')
+# try: 
+#     data_validada = DataVerificado(**data)
+#     print("Se valido correctamente")
+#     print(data)
+# except ValueError as e:
+#     print(f'Error de validadcion: {e}')

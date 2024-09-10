@@ -1,8 +1,8 @@
 data_fe = {
     "identificacion": {
-        "version": 3,
+        "version": 1,
         "ambiente":"00",
-        "tipoDte": "03",
+        "tipoDte": "01",
         "numeroControl": "DTE-01-F0000000-311111111111111",
         "codigoGeneracion": "516413E3-12A2-78D5-7A79-6B6DFE861395",
         "tipoModelo": 1,
@@ -37,8 +37,8 @@ data_fe = {
         "nombreComercial": "pelitinhas",
         "tipoEstablecimiento": "02",
         "direccion":{
-            "departamento": "02",
-            "municipio": "13",
+            "departamento": "05",
+            "municipio": "22",
             "complemento": "cerca a la piscina municipal",   
         },
         "telefono": "123456789",
@@ -101,8 +101,9 @@ data_fe = {
           "ventaNoSuj": 1,
           "ventaExenta": 1,
           "ventaGravada": 1,
-          "tributos": {
-            "22"},
+          "tributos": [
+            "20"
+          ],
           # "tributos": None,
           "psv": 0,
           "noGravado": 0,

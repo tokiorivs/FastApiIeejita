@@ -13,7 +13,7 @@ class Identificacion(BaseModel):
     numeroControl: str =Field(
         min_length=31,
         max_length=31,
-        pattern="^DTE-01-[A-Z0-9]{8}-[0-9]{15}$", 
+        pattern=r"^DTE-01-[A-Z0-9]{8}-[0-9]{15}$", 
 
         description="Número de Control")
     
@@ -27,7 +27,7 @@ class NumeroControl(BaseModel):
     numeroControl: str = Field(
         min_length=31,
         max_length=31,
-        pattern="^DTE-01-[A-Z0-9]{8}-[0-9]{15}$", 
+        pattern=r"^DTE-01-[A-Z0-9]{8}-[0-9]{15}$", 
         description="Número de Control"
     )
 class CodigoGeneracion(BaseModel):
