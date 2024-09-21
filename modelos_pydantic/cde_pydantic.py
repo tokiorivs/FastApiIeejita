@@ -166,7 +166,7 @@ class ResumenCde(BaseModel):
         description= "Total en Letras",
     )
     pagos:Optional[list[ItemPagoCde]] = Field(
-        min_items = 1,
+        min_length= 1,
         description= "Pagos"
     )
 

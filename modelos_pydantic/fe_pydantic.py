@@ -15,28 +15,70 @@ class IdentificacionFe(Identificacion):
         #validamos si es una transmision normal los campos de contingencia y motivo deben ser nulos
         if self.tipoOperacion == 1: 
             if self.tipoModelo != 1:
-                raise ValueError("cuando el tipoOperacion es 1, el tipoModelo debe ser 1") 
+                raise ValueError(f"cuando el tipoOperacion es {TipoTransmision.transmisionNormal.name} valor 1, el tipoModelo debe ser {ModeloFacturacion.modeloFacturacionPrevio.name} de valor 1 ") 
             if self.tipoContingencia != None:
                 raise ValueError(f"el tipo de contingencia deben ser null o None")
             elif self.motivoContin != None  :
-                raise ValueError("el motivo de contingencia debe ser null or None, no debe haber motivo de contingencia") 
-        if self.tipoOperacion == 2:
+                raise ValueError("el motivo de contingencia debe ser null or None") 
+        elif self.tipoOperacion == 2:
             if self.tipoModelo != 2:
-                raise ValueError("cuando el tipoOperacion es 2, el tipoModelo debe ser 2") 
+                raise ValueError(f"cuando el tipoOperacion es {TipoTransmision.transmisionDiferido.name} valor 2, el tipoModelo debe ser {ModeloFacturacion.modeloFacturacionDiferido.name} de valor 2") 
         #validamos si el motivo de la contingencia es otro, si o si debemos rellenar el campo del motivo de la contingencia
         elif self.tipoOperacion == 2:
-            if self.tipoContingencia == self.contingeciaOtro:
+            if self.tipoContingencia == TipoContingencia.otro:
                 if self.motivoContin == None:
-                    raise ValueError("error, debe ingresar el motivo de la contigencia")
+                    raise ValueError("error, debe ingresar el motivo de la contigencia, no puede ser None")
         elif self.tipoDte == "0":
             raise ValueError("Para facturas electronicas tipoDte es '01' ")
+
+
+class DocRelacionadoFe(DocRelacionado):
+    numeroDocumento:str = Field(
+        pattern= r"^[A-F0-9]{8}-[A-F0-9]{4}-[A-F0-9]{4}-[A-F0-9]{4}-[A-F0-9]{12}$"
+    )
+    
+    @model_validator(mode="after")
+    def tipoGeneracionValidator(self):
+        if self.tipoGeneracion == TipoGeneracionDocumento.fisico:
+            if len(self.numeroDocumento) > 20:
+                raise ValueError("el numero de documento no puede tener mas de 20 caracteres")
+        elif self.tipoGeneracion == TipoGeneracionDocumento.electronico:
+            patronDoc = re.compile(r'^[A-F0-9]{8}-[A-F0-9]{4}-[A-F0-9]{4}-[A-F0-9]{4}-[A-F0-9]{12}$')
+            if not patronDoc.match(str(self.numeroDocumento)):
+                raise ValueError("si el tipoGeneracionDocumento es electronico(2), numeroDocumento debe tener el situiente patron: '^[A-F0-9]{8}-[A-F0-9]{4}-[A-F0-9]{4}-[A-F0-9]{4}-[A-F0-9]{12}$' ")
+        elif self.tipoDocumento is not TipoDocumento.docContableLiquidacion or self.tipoDocumento is not TipoDocumento.notaRemision:
+            raise ValueError(f"Tipo de Documento Tributario relacionad solo permite docContableLiquidacion(09), notaRemision(04)") 
+        elif self.tipoDocumento is not TipoDocumento.notaRemision or self.tipoDocumento is not TipoDocumento.docContableLiquidacion:
+            raise ValueError("los valores permitidos para el tipo de Documento es 04, 09")
+        return self
+             
 
 class EmisorFe(Emisor):
     #verificar el numero de caracteres del nit si pueden ser menores
     nit:str = Field(
-        pattern= "^([0-9]{14}|[0-9]{9})$",
+        pattern= r"^([0-9]{14}|[0-9]{9})$",
         max_length= 14,
         description= "NIT (emisor)",
+    )
+    codEstableMH:str = Field(
+        min_length= 4,
+        max_length= 4,
+        description= "Código del establecimiento asignado por el MH", 
+    )
+    codEstable:str = Field(
+        min_length= 4,
+        max_length= 4,
+        description= "Código del establecimiento asignado por el contribuyente", 
+    )
+    codPuntoVentaMH:str = Field(
+        min_length= 4,
+        max_length= 4,
+        description= "Código del Punto de Venta (Emisor) asignado por el MH", 
+    )
+    codPuntoVenta:str = Field(
+        min_length= 1,
+        max_length= 15,
+        description= "Código del Punto de Venta (Emisor) asignado por el contribuyente", 
     )
 class ReceptorFe(Receptor):
     
@@ -131,7 +173,7 @@ class ItemCuerpoDocumentoFe(ItemCuerpoDocumento):
     )
     tributos:Optional[list[TributosAplicadosPorItemsResumidos]] = Field(
         description= "codigo de tributo",
-        min_items = 1,
+        min_length= 1,
         set = True, # nose permiten elementos duplicados en el arreglo se cambio unique_items por deprecado
     )
     psv: float = Field(
@@ -173,7 +215,7 @@ class ItemCuerpoDocumentoFe(ItemCuerpoDocumento):
                     raise ValueError(" si el codTributo es None, los tributos no pueden ser None")
 
 class ItemPagoFe(ItemPago):
-    plazo:Optional[str] = Field(
+    plazo:Optional[Plazo] = Field(
         pattern= r"^0[1-3]$",
         description="Plazo",
     )
@@ -185,7 +227,7 @@ class ItemPagoFe(ItemPago):
 
 class ResumenFe(Resumen):
     pagos:Optional[list[ItemPagoFe]] = Field(
-        min_items = 1,
+        min_length= 1,
         description= "Pagos"
     )
     
@@ -235,7 +277,6 @@ class ResumenFe(Resumen):
         multiple_of= 0.01,
         description= "Sub-Total",
     )
-    ivaPercil:int = Field()
     ivaRetel: float = Field(
         ge= 0,
         lt= 100000000000,
@@ -263,7 +304,7 @@ class ResumenFe(Resumen):
 
 class DataVerificado(BaseModel):
     identificacion: IdentificacionFe
-    documentoRelacionado:Optional[list[DocRelacionado]] = Field(
+    documentoRelacionado:Optional[list[DocRelacionadoFe]] = Field(
         default= None,
         min_length= 1,
         max_length= 10,
@@ -281,8 +322,8 @@ class DataVerificado(BaseModel):
         description= "Ventas por cuenta de terceros"
     )
     cuerpoDocumento:list[ItemCuerpoDocumentoFe] = Field(
-        min_items =1,
-        max_items=2000
+        min_length=1,
+        max_length=2000
     )
     resumen:ResumenFe
     extension:Optional[Extension]

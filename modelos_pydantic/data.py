@@ -5,8 +5,8 @@ data_fe = {
         "tipoDte": "01",
         "numeroControl": "DTE-01-F0000000-311111111111111",
         "codigoGeneracion": "516413E3-12A2-78D5-7A79-6B6DFE861395",
-        "tipoModelo": 1,
-        "tipoOperacion": 1,
+        "tipoModelo": 2,
+        "tipoOperacion": 2,
         "tipoContingencia": None,
         "motivoContin": None,
         "fecEmi": "2022-10-20",
@@ -85,7 +85,11 @@ data_fe = {
         "medico":None
         }
       ],
-      "ventaTercero":None, 
+    "ventaTercero": {
+        "nit": "12345678912345",
+        "nombre": "Juan Pérez"
+    },
+    
     "cuerpoDocumento": [
         {
           "numItem": 1,
@@ -129,7 +133,6 @@ data_fe = {
       ],
   
       "subTotal": 0,
-      "ivaPercil": 1,
       "ivaRetel": 0,
       "reteRenta": 0,
       "montoTotalOperacion": 1100,

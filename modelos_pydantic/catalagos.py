@@ -191,13 +191,7 @@ class UnidadDeMedida(int, Enum):
     otra = 99
 
  
-#CAT-022 tipo de documento de identificacion del recepto
-class TipoDocumentoReceptor(str, Enum):
-    nit = "36"
-    dui = "13"
-    otro = "37"
-    pasaporte = "03"
-    carnetRecidente = "02"
+
 
 class TributosResumenDte(str, Enum):
     iva13 = "20"  # Impuesto al Valor Agregado 13%/
@@ -262,13 +256,37 @@ class TributosAplicadosPorItemsResumidos(str, Enum):
     alcoholEtilico = "A7"  # Alcohol Etilico
     sacosSinteticos = "A9"  # Sacos Sintéticos
 
-
-
+#CAT-016 Condicion Operacion
+class CondicionOperacion(int, Enum):
+    contado = 1
+    credito = 2
+    otro = 3
+#CAT-018 Plazo
+class Plazo(str, Enum):
+    dias = "01"
+    meses = "02"
+    años = "03"
 
 #CAT-020 Tipo de persona
 class TipoPersona(int, Enum):
     personaNatural = 1
     personaJuridica = 2  
+
+#CAT-021 Otros Documentoss Asociados    
+class CodDocAsociado(int, Enum):
+    emisor=1,
+    receptor= 2,
+    medico=3,
+    transporte=4,
+
+#CAT-022 tipo de documento de identificacion del recepto
+class TipoDocumentoReceptor(str, Enum):
+    nit = "36"
+    dui = "13"
+    otro = "37"
+    pasaporte = "03"
+    carnetRecidente = "02"
+    
 #CAT-026 Tipo Donacion
 class TipoDonacion(int, Enum):
     efectivo = 1,

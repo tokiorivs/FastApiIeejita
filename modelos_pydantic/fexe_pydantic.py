@@ -183,6 +183,7 @@ class ItemCuerpoDocumentoFexe(ItemCuerpoDocumento):
                 if "C3" not in self.tributos:
                     raise ValueError("cuando el noGravado es 0, incluye en tributos el valor 'C3' ")
         return self
+    
 class ItemPagoFexe(ItemPago):
     plazo:Optional[str] = Field(
         pattern= r"^0[1-3]$",

@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from datetime import datetime, time
-from pydantic import BaseModel, Field, field_validator ,model_validator, EmailStr
-from typing import Optional, Set
+from pydantic import BaseModel, Field ,model_validator, EmailStr
+from typing import Optional
 import re
 from catalagos import *
 
@@ -9,7 +9,7 @@ from catalagos import *
 app = FastAPI()
     
 class Identificacion(BaseModel):
-    version:int = Field(default=1, description="Version")
+    version:int = Field( description="Version")
     ambiente:AmbienteDestino = Field(description="Ambiente de destino")
     tipoDte:TipoDocumento = Field( description="Tipo de Documento")
     numeroControl:str = Field(
@@ -65,25 +65,6 @@ class DocRelacionado(BaseModel):
         max_length= 36,
     )
     fechaEmision:datetime = Field(description= "Fecha de Generacipon del documento relacionado")
-    
-    #validamos que solo se puedan ingresar como tipo de documento los valores 04 y 09
-    @field_validator("tipoDocumento")
-    def verificacionDocumento(cls, v ):
-        if v != TipoDocumento.notaRemision and v != TipoDocumento.docContableLiquidacion:
-            raise ValueError("los valores permitidos para el tipo de Documento es 04, 09")
-    
-    #validamos las condiciones si el documento es fisico o electronico
-    @model_validator(mode="after")
-    def tipoGeneracion(self):
-        if self.tipoGeneracion == 1:
-            if len(self.numeroDocumento) > 20:
-                raise ValueError("el numero de documento no puede tener mas de 20 caracteres")
-        elif self.tipoGeneracion == 2:
-            patronDoc = re.compile(r'^[A-F0-9]{8}-[A-F0-9]{4}-[A-F0-9]{4}-[A-F0-9]{4}-[A-F0-9]{12}$')
-            if not patronDoc.match(str(self.numeroDocumento)):
-                raise ValueError("el numero del documento no cumple con el patron")
-        
-        return self
     
 class Direccion(BaseModel):
     departamento:Departamento = Field(
@@ -151,7 +132,7 @@ class Direccion(BaseModel):
 class Emisor(BaseModel):
     
     nrc:str = Field(
-        pattern= "^[0-9]{1,8}$",
+        pattern= r"^[0-9]{1,8}$",
         min_length= 2,
         max_length= 8,
         description=("NRC (emisor)"),
@@ -162,7 +143,7 @@ class Emisor(BaseModel):
         description= "Nombre, denominación o razón social del contribuyente (Emisor)",
     )
     codActividad:str = Field(
-        pattern= "^[0-9]{2,6}$",
+        pattern= r"^[0-9]{2,6}$",
         min_length= 5,
         max_length= 6,
         description="Código de Actividad Económica (Emisor)"
@@ -191,26 +172,27 @@ class Emisor(BaseModel):
         max_length= 100,
         description= "Correo electrónico (Emisor)"
     )
-    codEstableMH:Optional[str] = Field(
-        min_length= 4,
-        max_length= 4,
-        description= "Código del establecimiento asignado por el MH", 
-    )
-    codEstable:Optional[str] = Field(
-        min_length= 4,
-        max_length= 4,
-        description= "Código del establecimiento asignado por el contribuyente", 
-    )
-    codPuntoVentaMH:Optional[str] = Field(
-        min_length= 4,
-        max_length= 4,
-        description= "Código del Punto de Venta (Emisor) asignado por el MH", 
-    )
-    codPuntoVenta:Optional[str] = Field(
-        min_length= 1,
-        max_length= 15,
-        description= "Código del Punto de Venta (Emisor) asignado por el contribuyente", 
-    )
+    #Verificar en que sectores esta
+    # codEstableMH:str = Field(
+    #     min_length= 4,
+    #     max_length= 4,
+    #     description= "Código del establecimiento asignado por el MH", 
+    # )
+    # codEstable:str = Field(
+    #     min_length= 4,
+    #     max_length= 4,
+    #     description= "Código del establecimiento asignado por el contribuyente", 
+    # )
+    # codPuntoVentaMH:str = Field(
+    #     min_length= 4,
+    #     max_length= 4,
+    #     description= "Código del Punto de Venta (Emisor) asignado por el MH", 
+    # )
+    # codPuntoVenta:str = Field(
+    #     min_length= 1,
+    #     max_length= 15,
+    #     description= "Código del Punto de Venta (Emisor) asignado por el contribuyente", 
+    # )
 class Receptor(BaseModel):
     tipoDocumento: TipoDocumentoReceptor = Field(
        description=   "Tipo de documento de identificación (Receptor)"
@@ -263,11 +245,12 @@ class Medico(BaseModel):
     def NitValidator(self):
         print(f'impriendo dentro de medico {self.nombre}')
         if self.nit == None and self.docIdentificacion == None:
-            raise ValueError(f"Si no hay NIT, ingresa un Documento de Identificación")
+            raise ValueError(f"Si no hay NIT, ingresa un Documento de Identificación, o viceversa")
         return self 
-    
+
+  
 class OtroDocumento(BaseModel):
-    codDocAsociado:int = Field(
+    codDocAsociado:CodDocAsociado = Field(
         ge= 1,
         le= 4,
         description= "Documento asociado",
@@ -284,16 +267,25 @@ class OtroDocumento(BaseModel):
     
     
 class VentaTercero(BaseModel):
-     nit:str = Field(
-        pattern= "^([0-9]{14}|[0-9]{9})$",
-        max_length= 14,
-        description= "NIT por cuenta de terceros",
-    )    
-     nombre:str = Field(
-         min_length= 1,
-         max_length= 250,
-         description= "Nombre, denominación o razoń social del Tercero",
-     )
+    #  nit:str = Field(
+    #     pattern= r"^([0-9]{14}|[0-9]{9})$",
+    #     max_length= 14,
+    #     description= "NIT por cuenta de terceros",
+    # )    
+    #  nombre:str = Field(
+    #      min_length= 2,
+    #      max_length= 200,
+    #      description= "Nombre, denominación o razoń social del Tercero",
+    #  )
+    nit:str = Field(
+        description="NIT por cuenta de Terceros",
+        pattern="^([0-9]{14}|[0-9]{9})$"
+    )
+    nombre:str = Field(
+        description="Nombre, denominación o razón social del Tercero",
+        max_length=200,
+        min_length=3
+    )
 
 class ItemCuerpoDocumento(BaseModel):
     numItem:int = Field(
@@ -308,7 +300,7 @@ class ItemCuerpoDocumento(BaseModel):
         multiple_of= 1e-08,
         description= "Cantidad"
     )
-    codigo:Optional[str] = Field(
+    codigo:str = Field(
         min_length= 1,
         max_length= 25,
         description= "Código",
@@ -368,12 +360,12 @@ class Resumen(BaseModel):
         multiple_of= 0.01,
         description= "Total de Operaciones Gravadas",
     )
-    porcentajeDescuento: float = Field(
-        ge= 0,
-        le= 100,  
-        multiple_of= 0.01,
-        description= "Porcentaje del monto global de Descuento, Bonificación, Rebajas y otros",
-    )
+    # porcentajeDescuento: float = Field(
+    #     ge= 0,
+    #     le= 100,  
+    #     multiple_of= 0.01,
+    #     description= "Porcentaje del monto global de Descuento, Bonificación, Rebajas y otros",
+    # )
     totalDescu: float = Field(
         ge= 0,
         lt= 100000000000,
@@ -386,31 +378,30 @@ class Resumen(BaseModel):
         multiple_of= 0.01,
         description= "Monto Total de la Operación",
     )
-    totalNoGravado: float = Field(
-        gt= -100000000000,  
-        lt= 100000000000,
-        multiple_of= 0.01,
-        description= "Total Cargos/Abonos que no afectan la base imponible",
-    )
-    totalPagar: float = Field(
-        ge= 0,
-        lt= 100000000000,
-        multiple_of= 0.01,
-        description= "Total a Pagar",
-    )
+    # totalNoGravado: float = Field(
+    #     gt= -100000000000,  
+    #     lt= 100000000000,
+    #     multiple_of= 0.01,
+    #     description= "Total Cargos/Abonos que no afectan la base imponible",
+    # )
+    # totalPagar: float = Field(
+    #     ge= 0,
+    #     lt= 100000000000,
+    #     multiple_of= 0.01,
+    #     description= "Total a Pagar",
+    # )
     totalLetras: str = Field(
         max_length= 200,
         description= "Valor en Letras",
     )
-    condicionOperacion: int = Field(
-        enum=[1, 2, 3],
+    condicionOperacion: CondicionOperacion = Field(
         description="Condición de la Operación",
     )
  
-    numPagoElectronico: Optional[str] = Field(
-        max_length= 100,
-        description= "Número de pago Electrónico"
-    )
+    # numPagoElectronico: Optional[str] = Field(
+    #     max_length= 100,
+    #     description= "Número de pago Electrónico"
+    # )
     
 class Extension(BaseModel):
     nombEntrega:str = Field(
@@ -455,50 +446,3 @@ class ApendiceItems(BaseModel):
        max_length= 150,
        description= "Valor/Dato" 
     )
- 
-# class DataVerificado(BaseModel):
-#     identificacion: Identificacion
-#     documentoRelacionado:Optional[list[DocRelacionado]] = Field(
-#         default= None,
-#         min_length= 1,
-#         max_length= 10,
-#         description= "Documentos Relacionados",
-#     )
-#     emisor:Emisor
-#     receptor:Receptor 
-#     otrosDocumentos:Optional[list[OtroDocumento]] = Field( 
-#         default= None,
-#         min_length= 1,
-#         max_length=  10,
-#         description= "Documentos Asociados",
-#     )
-#     ventaTercero:Optional[VentaTercero] = Field( 
-#         description= "Ventas por cuenta de terceros"
-#     )
-#     cuerpoDocumento:list[ItemCuerpoDocumento] = Field(
-#         min_items =1,
-#         max_items=2000
-#     )
-#     resumen:Resumen
-#     extension:Optional[Extension]
-#     apendice: list[ApendiceItems]
-    
-#     @model_validator(mode="after")
-#     def MontoTotalOperacionValidator(self):
-#         if self.resumen.montoTotalOperacion > 1095:
-#             if self.receptor.tipoDocumento == None:
-#                 raise ValueError("el TipoDocumento no puede ser None")
-#             if self.receptor.numDocumento == None:
-#                 raise ValueError("el numDocumento no puede ser None")
-#             if self.receptor.nombre == None:
-#                 raise ValueError("el nombre no puede ser None")
-            
-# #importamos la data para la verificacion
-# data = data_fe
-
-# try: 
-#     data_validada = DataVerificado(**data)
-#     print("Se valido correctamente")
-#     print(data)
-# except ValueError as e:
-#     print(f'Error de validadcion: {e}')
