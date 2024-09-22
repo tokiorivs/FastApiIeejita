@@ -128,6 +128,192 @@ class ReceptorNd(BaseModel):
         description= "Correo electrónico (Receptor)"
     )
 
+class ItemCuerpoDocumentoNd(ItemCuerpoDocumento):
+    tipoItem:TipoItem = Field(
+        description= "Tipo de item"
+    )
+    numeroDocumento:str = Field(
+        min_length= 1,
+        max_length= 36,
+        description= "Número de documento relacionado"
+    )
+    codTributo: Optional[TributosAplicadosPorItemsReflejados] = Field(
+        min_length= 2,
+        max_length= 2,
+        description= "Tributo sujeto a cálculo de IVA",
+    )
+    precioUni:float = Field(
+        #verficar que no existe una restriccion menor o igual a  0
+        lt= 100000000000,
+        multiple_of= 0.00000001,
+        description= "Precio Unitario"
+    )            
+    montoDescu:float = Field(
+        ge= 0,
+        lt= 100000000000,
+        multiple_of= 0.00000001,
+        description= "Descuento, Bonificación, Rebajas por ítem"
+    ) 
+    ventaNoSuj:float = Field(
+        ge= 0,
+        lt= 100000000000,
+        multiple_of= 0.00000001,
+        description= "Ventas no Sujetas", 
+    )
+    ventaExenta:float = Field(
+        ge= 0,
+        lt= 100000000000,
+        multiple_of= 0.00000001,
+        description= "Ventas Exentas",
+    )
+    ventaGravada:float = Field(
+        ge= 0,
+        lt= 100000000000,
+        multiple_of= 0.00000001,
+        description= "Ventas Gravadas",
+    )
+    tributos:Optional[list[TributosAplicadosPorItemsResumidos]] = Field(
+        description= "codigo de tributo",
+        min_length= 1,
+        set = True, # nose permiten elementos duplicados en el arreglo se cambio unique_items por deprecado
+    )
+    @model_validator(mode="after")
+    def item_cuerpo_documento_nc_validator(self):
+        if self.tipoItem == TipoItem.otrosTributosPorItem:
+            if self.uniMedida != UnidadDeMedida.otra:
+                raise ValueError("cuando el tipoItem es otrosTributosPorItem(4),uniMedida debe ser 'otra'(99) ") 
+        #verificar los tributos, con la documentacion, verificcar cuales entran
+        if self.codTributo == None:
+            if self.tributos is None:
+                raise ValueError("cuando el codTributo es None, los tributos no pueden ser none")
+        if self.ventaGravada <= 0:
+            if self.tributos is not None:
+                raise ValueError("cuando la ventaGravada es 0, los tributos deben ser None")
+        elif self.ventaGravada > 0:
+            if self.tributos == None:
+                raise ValueError("cuando la ventaGravada es mayor a 0, debe haber tributos")
+ 
+class ResumenNd(Resumen):
+    totalNoSuj:float = Field(
+        ge= 0,
+        lt= 100000000000,
+        multiple_of= 0.01,
+        description= "Total de Operaciones no sujetas"
+    )
+    totalExenta: float = Field(
+        ge= 0,
+        lt= 100000000000,
+        multiple_of= 0.01,
+        description= "Total de Operaciones exentas",
+    )
+    subTotalVentas: float = Field(
+        ge= 0,
+        lt= 100000000000,
+        multiple_of= 0.01,
+        description= "Suma de operaciones sin impuestos",
+    )
+    descuNoSuj: float = Field(
+        ge= 0,
+        lt= 100000000000,
+        multiple_of= 0.01,
+        description= "Monto global de Descuento, Bonificación, Rebajas y otros a ventas no sujetas",
+    )
+    descuExenta: float = Field(
+        ge= 0,
+        lt= 100000000000,
+        multiple_of= 0.01,
+        description= "Monto global de Descuento, Bonificación, Rebajas y otros a ventas exentas",
+    )
+    descuGravada: float = Field(
+        ge= 0,
+        lt= 100000000000,
+        multiple_of= 0.01,
+        description= "Monto global de Descuento, Bonificación, Rebajas y otros a ventas gravadas",
+    )
+    tributos:list[ItemTributo] = Field(
+        # unique_items= True,
+        description= "Resumen de tributos"    
+    )
+    subTotal: float = Field(
+        ge= 0,
+        lt= 100000000000,
+        multiple_of= 0.01,
+        description= "Sub-Total",
+    )
+    ivaPercil: float = Field(
+        ge= 0,
+        lt= 100000000000,
+        multiple_of= 0.01,
+        description= "IVA Percibido",
+    )
+    ivaRetel: float = Field(
+        ge= 0,
+        lt= 100000000000,
+        multiple_of= 0.01,
+        description= "IVA Retenido",
+    )
+    reteRenta: float = Field(
+        ge= 0,
+        lt= 100000000000,
+        multiple_of= 0.01,
+        description= "Retención Renta",
+    )
+    numPagoElectronico: Optional[str] = Field(
+        max_length= 100,
+        description= "Número de pago Electrónico"
+    )
+    @model_validator(mode= "after")
+    def resume_validator(self):
+        if self.totalGravada == 0:
+            if self.ivaPercil > 0:
+                raise ValueError("se totalGravada es igual a 0, ivaPercil no puede ser mayor a 0")
+            if self.ivaRetel > 0:
+                raise ValueError("cuando totalGravada es 0, el ivaRetel no puede ser mayor a 0")
+
+class ExtensionNd(BaseModel):
+    nombEntrega:str = Field(
+        min_length= 1,
+        max_length= 100,
+        description= "Nombre del responsable que Genera el DTE",
+    )   
+    docuEntrega:str = Field(
+        min_length= 1,
+        max_length= 25,
+        description= "Documento de identificación de quien genera el DTE",
+    )
+    nombRecibe: str = Field(
+        min_length= 1,
+        max_length= 100,
+        description= "Nombre del responsable de la operación por parte del receptor",
+    )
+    docuRecibe: str = Field(
+        min_length= 1,
+        max_length= 25,
+        description= "Documento de identificación del responsable de la operación por parte del receptor",
+    )
+    observaciones: str = Field(
+        max_length= 3000,
+        description= "Observaciones",
+    ) 
+
+
+class ApendiceItemsNd(BaseModel):
+    campo:str = Field(
+        min_length= 2,
+        max_length= 25,
+        description= "Nombre del campo",
+    )
+    etiqueta:str = Field(
+        min_length= 3,
+        max_length= 50,
+        description= "Descripcion"
+    )
+    valor:str = Field(
+        min_length= 1,
+        max_length= 150,
+        description= "Valor/Dato" 
+    )
+
 class NdPydantic(BaseModel):
     identificacion:IdentificacionNd
     documentoRelacionado:list[DocumentoRelacionadoNd] = Field(
@@ -137,19 +323,19 @@ class NdPydantic(BaseModel):
     )
     emisor:EmisorNd 
     receptor:ReceptorNd
-    # ventaTercero:VentaTercero
+    ventaTercero:VentaTercero
 
-    # cuerpoDocumento:list[ItemCuerpoDocumentoNd] = Field(
-    #     min_length= 1,
-    #     max_length= 2000,
-    # )
-    # resumen:ResumenNd
-    # extension:ExtensionNd
-    # apendice:Optional[list[ApendiceItemsNd]] = Field(
-    #     description= "Apéndice",
-    #     min_length= 1,
-    #     max_length= 10,
-    # )
+    cuerpoDocumento:list[ItemCuerpoDocumentoNd] = Field(
+        min_length= 1,
+        max_length= 2000,
+    )
+    resumen:ResumenNd
+    extension:ExtensionNd
+    apendice:Optional[list[ApendiceItemsNd]] = Field(
+        description= "Apéndice",
+        min_length= 1,
+        max_length= 10,
+    )
 
 data = data_nd
 

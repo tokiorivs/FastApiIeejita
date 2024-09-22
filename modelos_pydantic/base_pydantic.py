@@ -267,19 +267,10 @@ class OtroDocumento(BaseModel):
     
     
 class VentaTercero(BaseModel):
-    #  nit:str = Field(
-    #     pattern= r"^([0-9]{14}|[0-9]{9})$",
-    #     max_length= 14,
-    #     description= "NIT por cuenta de terceros",
-    # )    
-    #  nombre:str = Field(
-    #      min_length= 2,
-    #      max_length= 200,
-    #      description= "Nombre, denominación o razoń social del Tercero",
-    #  )
+   
     nit:str = Field(
         description="NIT por cuenta de Terceros",
-        pattern="^([0-9]{14}|[0-9]{9})$"
+        pattern=r"^([0-9]{14}|[0-9]{9})$"
     )
     nombre:str = Field(
         description="Nombre, denominación o razón social del Tercero",

@@ -61,72 +61,73 @@ data_nd= {
         "telefono":"98203840339",
         "correo":"jhonsalchichon@gmail.com",
     },
-    # "ventaTercero":{
-    #     "nit":"111111111",
-    #     "nombre":"Jhon Salchichon",
-    # },
-    # "cuerpoDocumento":[
-    #     {
-    #       "numItem": 1,
-    #       "tipoItem": 4,
-    #       "numeroDocumento":"01",
-    #       "codTributo":"57",
-    #       "codigo": "12",
-    #       "codTritubo":1,
-    #       "descripcion": "bebidas gaseosas",
-    #       "cantidad": 1,
-    #       "uniMedida": 99,
-    #       "precioUni": 3,
-    #       "montoDescu": 1,
-    #       "ventaNoSuj":1,
-    #       "ventaExenta":2,
-    #       "ventaGravada":1,
-    #       "tributos":[
-    #         "C3","59","20"
-    #         ],
-    #       # "tributos": None,
-    #     },
-    #   ],
-    # "resumen": {
-    #   "totalNoSuj":0,
-    #   "totalExenta":0,
-    #   "totalGravada":0,
-    #   "subTotalVentas":0,
-    #   "descuNoSuj":0,
-    #   "descuExenta":0,
-    #   "descuGravada":0,
-    #   "totalDescu":0,
-    #   "tributos":[
-    #    {
-    #    "codigo":"A8",
-    #    "descripcion":"mundo",
-    #    "valor":1, 
-    #    },
-    #   ],
-    #   "subTotal":0,
-    #   "ivaPercil":0,
-    #   "ivaRetel": 0,
-    #   "reteRenta": 0,
-    #   "montoTotalOperacion":0,
-    #   "totalLetras": "02",
-    #   "condicionOperacion": 2,
-    # },
-    # "extension": {
-    #   "nombEntrega": "holss",
-    #   "docuEntrega": " asddfs",
-    #   "nombRecibe": " dfdsff",
-    #   "docuRecibe": "fdfddfd",
-    #   "observaciones": "fdfd",
-    # },
+    "ventaTercero":{
+        "nit":"111111111",
+        "nombre":"Jhon Salchichon",
+    },
+    "cuerpoDocumento":[
+        {
+          "numItem": 1,
+          "tipoItem": 4,
+          "numeroDocumento":"01",
+          "codigo": "12",
+          "codTributo":"57",
+          "codTritubo":1,
+          "descripcion": "bebidas gaseosas",
+          "cantidad": 1,
+          "uniMedida": 99,
+          "precioUni": 3,
+          "montoDescu": 1,
+          "ventaNoSuj":1,
+          "ventaExenta":2,
+          "ventaGravada":1,
+          "tributos":[
+            "C3","59","20"
+            ],
+        #   "tributos": None,
+        },
+      ],
+    "resumen": {
+      "totalNoSuj":0,
+      "totalExenta":0,
+      "totalGravada":0,
+      "subTotalVentas":0,
+      "descuNoSuj":0,
+      "descuExenta":0,
+      "descuGravada":0,
+      "totalDescu":0,
+      "tributos":[
+       {
+       "codigo":"A8",
+       "descripcion":"mundo",
+       "valor":1, 
+       },
+      ],
+      "subTotal":0,
+      "ivaPercil":0,
+      "ivaRetel": 0,
+      "reteRenta": 0,
+      "montoTotalOperacion":0,
+      "totalLetras": "02",
+      "condicionOperacion": 2,
+      "numPagoElectronico":"339",
+    },
+    "extension": {
+      "nombEntrega": "holss",
+      "docuEntrega": " asddfs",
+      "nombRecibe": " dfdsff",
+      "docuRecibe": "fdfddfd",
+      "observaciones": "fdfd",
+    },
   
-    # # "apendice":None,
-    # "apendice": [
-    #   {
-    #     "campo": "hola mundo",
-    #     "etiqueta": "saludos ",
-    #     "valor": "laksjldjfakldjlkdkjkl"
-    #   }
-    # ]
+    # "apendice":None,
+    "apendice": [
+      {
+        "campo": "hola mundo",
+        "etiqueta": "saludos ",
+        "valor": "laksjldjfakldjlkdkjkl"
+      }
+    ]
 
     
 }

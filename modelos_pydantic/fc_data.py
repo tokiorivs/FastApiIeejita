@@ -1,4 +1,4 @@
-data_fe = {
+data_fc = {
     "identificacion": {
         "version": 1,
         "ambiente":"00",
@@ -43,8 +43,8 @@ data_fe = {
         },
         "telefono": "123456789",
         "correo":"albertPelo@gmail.com",
-        "codEstable": None,
-        "codPuntoVenta": None,
+        "codEstable": "0312",
+        "codPuntoVenta": "02934",
         "codEstableMH": "4577",
         "codPuntoVentaMH": "4578"  
     },

@@ -286,7 +286,7 @@ class ExtensionNc(BaseModel):
     )
     docuRecibe: str = Field(
         min_length= 1,
-        max_length= 100,
+        max_length= 25,
         description= "Documento de identificación del responsable de la operación por parte del receptor",
     )
     observaciones: str = Field(

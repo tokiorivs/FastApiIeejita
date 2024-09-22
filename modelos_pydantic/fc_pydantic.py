@@ -1,18 +1,20 @@
 from fastapi import FastAPI
 from base_pydantic import *
-from data import data_fe
+from fc_data import data_fc
 
 
 app = FastAPI()
 class IdentificacionFe(Identificacion):
     tipoDte:TipoDocumento = Field(
-        # default= "01",
+        default= "01",
         description="Tipo de Documento")
     
     #validacion de los campos de contingencia y su coherencia entre ellos
     @model_validator(mode="after")
     def ValidadorOperacion(self):
         #validamos si es una transmision normal los campos de contingencia y motivo deben ser nulos
+        if self.tipoDte is not TipoDocumento.factura:
+            raise ValueError("el tipoDte debe ser factura(01)")
         if self.tipoOperacion == 1: 
             if self.tipoModelo != 1:
                 raise ValueError(f"cuando el tipoOperacion es {TipoTransmision.transmisionNormal.name} valor 1, el tipoModelo debe ser {ModeloFacturacion.modeloFacturacionPrevio.name} de valor 1 ") 
@@ -340,7 +342,7 @@ class DataVerificado(BaseModel):
                 raise ValueError("el nombre no puede ser None")
             
 #importamos la data para la verificacion
-data = data_fe
+data = data_fc
 
 try: 
     data_validada = DataVerificado(**data)
